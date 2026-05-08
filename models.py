@@ -8,7 +8,7 @@ class User(db.Model):
     last_name = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     type = db.Column(db.String(20), nullable=True)  # 'Student', 'Teacher', 'Headmaster', 'Manager'
-    password_hash = db.Column(db.String(128), nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
 
     # Nullable Foreign Keys for Access Control
     school_id = db.Column(db.Integer, db.ForeignKey('school.id'), nullable=True)
