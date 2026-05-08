@@ -1,7 +1,6 @@
 from flask import Flask
 from extensions import db, socketio
-import models
-import events
+import os
 from routes.schools import school_bp
 from routes.users import user_bp
 from routes.classrooms import classroom_bp
@@ -11,6 +10,13 @@ from routes.messages import message_bp
 from flask_jwt_extended import JWTManager
 
 app = Flask(__name__)
+
+# Where should we save the files?
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__name__)), 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Maximum file size (16 MB)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 # Configure the database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///edunexus.db'
