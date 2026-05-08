@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from flask import Flask
 from extensions import db, socketio
 import os
@@ -11,6 +12,7 @@ from routes.subjects import subject_bp
 from flask_jwt_extended import JWTManager
 import events
 
+load_dotenv()
 app = Flask(__name__)
 
 # Where should we save the files?
@@ -20,10 +22,15 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Maximum file size (16 MB)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-# Configure the database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///edunexus.db'
+# If DATABASE_URL exists (in the cloud), use it. Otherwise, fall back to local SQLite.
+# Note: Render sometimes uses 'postgres://' but SQLAlchemy requires 'postgresql://'
+db_url = os.environ.get('DATABASE_URL', 'sqlite:///edunexus.db')
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'super-secret-key-for-edunexus-change-later' # In a real app, this is hidden!
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET', 'fallback-secret-key')
 
 # Plug the db tool into this specific app
 db.init_app(app)
