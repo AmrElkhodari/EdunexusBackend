@@ -57,3 +57,31 @@ def handle_send_message(data):
     except Exception as e:
         db.session.rollback()
         emit('error', {'message': f"Failed to send message: {str(e)}"})
+
+@socketio.on('join_room')
+def handle_join_room(data):
+    token = data.get('token')
+    classroom_id = data.get('classroom_id')
+    subject_id = data.get('subject_id')
+
+    decoded_token = decode_token(token)
+    current_user = User.query.get(decoded_token['sub'])
+
+    # Not in a school at all
+    if current_user.school_id is None:
+        emit('error', {'message': 'You must be assigned to a school.'})
+        return
+
+    # Student must belong to this classroom
+    if current_user.type == 'Student' and current_user.classroom_id != int(classroom_id):
+        emit('error', {'message': 'This is not your classroom.'})
+        return
+
+    # Teacher must belong to this subject
+    if current_user.type == 'Teacher' and current_user.subject_id != int(subject_id):
+        emit('error', {'message': 'This is not your subject.'})
+        return
+
+    room_name = f"chat_{classroom_id}_{subject_id}"
+    join_room(room_name)
+    print(f"✅ {current_user.first_name} joined {room_name}")

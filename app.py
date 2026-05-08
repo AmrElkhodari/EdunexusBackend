@@ -7,7 +7,9 @@ from routes.classrooms import classroom_bp
 from routes.materials import material_bp
 from routes.announcements import announcement_bp
 from routes.messages import message_bp
+from routes.subjects import subject_bp
 from flask_jwt_extended import JWTManager
+import events
 
 app = Flask(__name__)
 
@@ -38,6 +40,7 @@ app.register_blueprint(classroom_bp, url_prefix='/api/classrooms')
 app.register_blueprint(material_bp, url_prefix='/api/materials')
 app.register_blueprint(announcement_bp, url_prefix='/api/announcements')
 app.register_blueprint(message_bp, url_prefix='/api/messages')
+app.register_blueprint(subject_bp, url_prefix='/api/subjects')
 
 @app.route('/')
 def home():
@@ -46,10 +49,6 @@ def home():
 @app.route('/api/status')
 def api_status():
     return {"system" : "EduNexus", "Version" : "1.0", "status" : "online"}
-
-@app.route('/api/classrooms/<classroom_id>')
-def get_classroom(classroom_id):
-    return {"classroom_id": classroom_id, "name": "Software Engineering", "status": "active"}
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from extensions import db
-from models import User
+from models import User, School
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
@@ -32,7 +32,7 @@ def update_user(user_id):
     try:
         current_user_id = get_jwt_identity()
         current_user = User.query.get(current_user_id)
-        if current_user.type != 'Headmaster':
+        if current_user.type not in ['Headmaster', 'Manager']:
             return {'status' : 'error', 'message' : 'unauthorised user'}, 403
         user = User.query.get(user_id)
         if user is None:
@@ -114,3 +114,31 @@ def login_user():
     except Exception as e:
         return {'status' : 'error', 'message' : str(e)}, 400
 
+@user_bp.route('/me', methods=['DELETE'])
+@jwt_required()
+def delete_account():
+    try:
+        current_user = User.query.get(get_jwt_identity())
+
+        # If Headmaster, delete the whole school and null out all users in it
+        if current_user.type == 'Headmaster':
+            school_id = current_user.school_id
+
+            # Null out all users belonging to this school
+            User.query.filter_by(school_id=school_id).update({
+                'school_id': None,
+                'classroom_id': None,
+                'subject_id': None,
+                'type': None
+            })
+
+            # Delete the school
+            school = School.query.get(school_id)
+            db.session.delete(school)
+
+        db.session.delete(current_user)
+        db.session.commit()
+        return {"status": "success", "message": "Account deleted successfully"}, 200
+    except Exception as e:
+        db.session.rollback()
+        return {"status": "error", "message": str(e)}, 400

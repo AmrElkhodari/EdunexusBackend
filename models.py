@@ -46,8 +46,9 @@ class Message(db.Model):
 
 class Material(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String(200), nullable=False)  # URL to the file
+    file_url  = db.Column(db.String(200), nullable=False)  # URL to the file
     sending_time = db.Column(db.DateTime, default=datetime.utcnow)
+    title = db.Column(db.String(200))
 
     # Foreign Keys
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
@@ -57,6 +58,7 @@ class Material(db.Model):
 class Announcement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(200), nullable=False)
+    title = db.Column(db.String(200))
     sending_time = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Foreign Keys
