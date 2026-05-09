@@ -1,3 +1,4 @@
+from flask_cors import CORS
 from dotenv import load_dotenv
 from flask import Flask
 from extensions import db, socketio
@@ -36,6 +37,7 @@ app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET', 'fallback-secret-key
 
 # Plug the db tool into this specific app
 db.init_app(app)
+CORS(app)
 jwt = JWTManager(app)
 socketio.init_app(app, cors_allowed_origins="*")
 
