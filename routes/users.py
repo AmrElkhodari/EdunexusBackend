@@ -74,21 +74,45 @@ def login_user():
 @jwt_required()
 def delete_account():
     try:
+        from models import School, Classroom, Subject, Message, Material, Announcement
         current_user = User.query.get(get_jwt_identity())
 
-        # If Headmaster, delete the whole school and null out all users in it
         if current_user.type == 'Headmaster':
             school_id = current_user.school_id
 
-            # Null out all users belonging to this school
+            # 1. Delete all content first
+            Message.query.filter_by(classroom_id=None).delete()
+            Announcement.query.filter(
+                Announcement.classroom_id.in_(
+                    db.session.query(Classroom.id).filter_by(school_id=school_id)
+                )
+            ).delete(synchronize_session='fetch')
+
+            Material.query.filter(
+                Material.classroom_id.in_(
+                    db.session.query(Classroom.id).filter_by(school_id=school_id)
+                )
+            ).delete(synchronize_session='fetch')
+
+            Message.query.filter(
+                Message.classroom_id.in_(
+                    db.session.query(Classroom.id).filter_by(school_id=school_id)
+                )
+            ).delete(synchronize_session='fetch')
+
+            # 2. Null out all users in the school
             User.query.filter_by(school_id=school_id).update({
                 'school_id': None,
                 'classroom_id': None,
                 'subject_id': None,
                 'type': None
-            })
+            }, synchronize_session='fetch')
 
-            # Delete the school
+            # 3. Delete classrooms and subjects
+            Classroom.query.filter_by(school_id=school_id).delete()
+            Subject.query.filter_by(school_id=school_id).delete()
+
+            # 4. Now safe to delete the school
             school = School.query.get(school_id)
             db.session.delete(school)
 
