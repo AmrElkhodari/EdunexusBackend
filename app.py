@@ -19,6 +19,7 @@ app = Flask(__name__)
 # Where should we save the files?
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__name__)), 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Maximum file size (16 MB)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
