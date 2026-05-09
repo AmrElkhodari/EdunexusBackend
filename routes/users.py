@@ -26,50 +26,6 @@ def create_user():
         db.session.rollback()
         return {'status' : 'error', 'message' : str(e)}, 400
 
-@user_bp.route('/<int:user_id>/assign', methods = ['PUT'])
-@jwt_required()
-def update_user(user_id):
-    try:
-        current_user_id = get_jwt_identity()
-        current_user = User.query.get(current_user_id)
-        if current_user.type not in ['Headmaster', 'Manager']:
-            return {'status' : 'error', 'message' : 'unauthorised user'}, 403
-        user = User.query.get(user_id)
-        if user is None:
-            return {"status": "error", "message": f"no user with id : {user_id}"}, 404
-        data = request.get_json()
-        if 'first_name' in data:
-            user.first_name = data.get('first_name')
-        if 'last_name' in data:
-            user.last_name = data.get('last_name')
-        if 'email' in data:
-            user.email = data.get('email')
-        if 'type' in data:
-            user.type = data.get('type')
-        if 'school_id' in data:
-            user.school_id = data.get('school_id')
-        if 'classroom_id' in data:
-            user.classroom_id = data.get('classroom_id')
-        if 'subject_id' in data:
-            user.subject_id = data.get('subject_id')
-        if 'password' in data:
-            user.password_hash = generate_password_hash(data.get('password'))
-        db.session.commit()
-        return {
-            "status": "success",
-            "message": "User updated!",
-            'first_name' : user.first_name,
-            'last_name' : user.last_name,
-            'email' : user.email,
-            'type' : user.type,
-            'school_id' : user.school_id,
-            'classroom_id' : user.classroom_id,
-            'subject_id' : user.subject_id,
-        }, 200
-    except Exception as e:
-        db.session.rollback()
-        return {"status": "error", "message": str(e)}, 400
-
 @user_bp.route('/settings', methods = ['PUT'])
 @jwt_required()
 def change_settings():

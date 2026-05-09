@@ -9,6 +9,7 @@ from routes.materials import material_bp
 from routes.announcements import announcement_bp
 from routes.messages import message_bp
 from routes.subjects import subject_bp
+from routes.admin import admin_bp
 from flask_jwt_extended import JWTManager
 import events
 
@@ -48,6 +49,7 @@ app.register_blueprint(material_bp, url_prefix='/api/materials')
 app.register_blueprint(announcement_bp, url_prefix='/api/announcements')
 app.register_blueprint(message_bp, url_prefix='/api/messages')
 app.register_blueprint(subject_bp, url_prefix='/api/subjects')
+app.register_blueprint(admin_bp, url_prefix='/api/admin')
 
 @app.route('/')
 def home():
